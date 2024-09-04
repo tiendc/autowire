@@ -56,7 +56,7 @@ func TestFuncProvider_Success(t *testing.T) {
 		ps1, err := parseProviders(NewSrv1_OK)
 		assert.Nil(t, err)
 		assert.Equal(t, 1, len(ps1.GetAll()))
-		assert.Equal(t, reflect.TypeFor[Service1](), ps1.GetAll()[0].TargetTypes()[0])
+		assert.Equal(t, typeFor[Service1](), ps1.GetAll()[0].TargetTypes()[0])
 		assert.Equal(t, reflect.TypeOf(NewSrv1_OK), reflect.TypeOf(ps1.GetAll()[0].Source()))
 	})
 }

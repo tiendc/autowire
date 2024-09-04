@@ -1,7 +1,6 @@
 package autowire
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -71,27 +70,27 @@ func TestContainerResolve_Success(t *testing.T) {
 		c, err := NewContainer([]any{NewSrv1_OK_With_Need_Srv2_Srv3_IntSlice, NewSrv2_OK_With_Need_Srv4_Srv5,
 			NewSrv3_OK, NewSrv4_OK, NewSrv5_OK, &struct1_OK, &struct5_OK})
 		assert.Nil(t, err)
-		dg, err := c.Resolve(reflect.TypeFor[Service1]())
+		dg, err := c.Resolve(typeFor[Service1]())
 		assert.Nil(t, err)
-		assert.Equal(t, reflect.TypeFor[Service1](), dg.TargetType)
+		assert.Equal(t, typeFor[Service1](), dg.TargetType)
 		assert.Equal(t, 3, len(dg.Dependencies))
 
 		dg1 := dg.Dependencies[0]
-		assert.Equal(t, reflect.TypeFor[Service2](), dg1.TargetType)
+		assert.Equal(t, typeFor[Service2](), dg1.TargetType)
 		assert.Equal(t, 2, len(dg1.Dependencies))
 		dg11 := dg1.Dependencies[0]
-		assert.Equal(t, reflect.TypeFor[Service4](), dg11.TargetType)
+		assert.Equal(t, typeFor[Service4](), dg11.TargetType)
 		assert.Equal(t, 0, len(dg11.Dependencies))
 		dg12 := dg1.Dependencies[1]
-		assert.Equal(t, reflect.TypeFor[Service5](), dg12.TargetType)
+		assert.Equal(t, typeFor[Service5](), dg12.TargetType)
 		assert.Equal(t, 0, len(dg12.Dependencies))
 
 		dg2 := dg.Dependencies[1]
-		assert.Equal(t, reflect.TypeFor[Service3](), dg2.TargetType)
+		assert.Equal(t, typeFor[Service3](), dg2.TargetType)
 		assert.Equal(t, 0, len(dg2.Dependencies))
 
 		dg3 := dg.Dependencies[2]
-		assert.Equal(t, reflect.TypeFor[[]int](), dg3.TargetType)
+		assert.Equal(t, typeFor[[]int](), dg3.TargetType)
 		assert.Equal(t, 0, len(dg3.Dependencies))
 	})
 }

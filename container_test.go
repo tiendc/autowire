@@ -48,7 +48,7 @@ func TestContainerGet(t *testing.T) {
 	t.Run("Not found", func(t *testing.T) {
 		c, err := NewContainer([]any{NewSrv1_OK})
 		assert.Nil(t, err)
-		_, err = c.Get(reflect.TypeFor[Service1]())
+		_, err = c.Get(typeFor[Service1]())
 		assert.ErrorIs(t, err, ErrNotFound)
 		assert.Contains(t, err.Error(), "ErrNotFound: object not found for type 'autowire.Service1'")
 	})
@@ -56,12 +56,12 @@ func TestContainerGet(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		c, err := NewContainer([]any{NewSrv1_OK})
 		assert.Nil(t, err)
-		v1, err := c.Build(reflect.TypeFor[Service1]())
+		v1, err := c.Build(typeFor[Service1]())
 		assert.Nil(t, err)
-		v2, err := c.Get(reflect.TypeFor[Service1]())
+		v2, err := c.Get(typeFor[Service1]())
 		assert.Nil(t, err)
 		assert.Equal(t, v1, v2)
-		_, err = c.Get(reflect.TypeFor[Service2]())
+		_, err = c.Get(typeFor[Service2]())
 		assert.ErrorIs(t, err, ErrNotFound)
 	})
 }

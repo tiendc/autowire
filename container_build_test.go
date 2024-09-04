@@ -2,7 +2,6 @@ package autowire
 
 import (
 	"context"
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,7 +17,7 @@ func TestContainerBuild_Failure(t *testing.T) {
 	t.Run("Provider not found (user type)", func(t *testing.T) {
 		c, err := NewContainer([]any{NewSrv1_OK_With_Need_Srv2_Srv3, NewSrv2_OK})
 		assert.Nil(t, err)
-		_, err = c.Build(reflect.TypeFor[Service1]())
+		_, err = c.Build(typeFor[Service1]())
 		assert.ErrorIs(t, err, ErrNotFound)
 		assert.Contains(t, err.Error(),
 			"ErrNotFound: provider not found for type 'autowire.Service3'")
@@ -27,7 +26,7 @@ func TestContainerBuild_Failure(t *testing.T) {
 	t.Run("Provider not found (primitive type)", func(t *testing.T) {
 		c, err := NewContainer([]any{NewSrv1_OK_With_Need_Srv2_Srv3_Struct1, NewSrv2_OK, NewSrv3_OK})
 		assert.Nil(t, err)
-		_, err = c.Build(reflect.TypeFor[Service1]())
+		_, err = c.Build(typeFor[Service1]())
 		assert.ErrorIs(t, err, ErrNotFound)
 		assert.Contains(t, err.Error(),
 			"ErrNotFound: provider not found for type '*autowire.Struct1_OK'")
@@ -36,7 +35,7 @@ func TestContainerBuild_Failure(t *testing.T) {
 	t.Run("Provider not found for target type", func(t *testing.T) {
 		c, err := NewContainer([]any{NewSrv1_OK, NewSrv2_OK})
 		assert.Nil(t, err)
-		_, err = c.Build(reflect.TypeFor[Service3]())
+		_, err = c.Build(typeFor[Service3]())
 		assert.ErrorIs(t, err, ErrNotFound)
 		assert.Contains(t, err.Error(),
 			"ErrNotFound: provider not found for type 'autowire.Service3'")
@@ -45,7 +44,7 @@ func TestContainerBuild_Failure(t *testing.T) {
 	t.Run("Provider return error as 2nd value", func(t *testing.T) {
 		c, err := NewContainer([]any{NewSrv1_Fail_With_Err, NewSrv2_OK, NewSrv3_OK})
 		assert.Nil(t, err)
-		_, err = c.Build(reflect.TypeFor[Service1]())
+		_, err = c.Build(typeFor[Service1]())
 		assert.ErrorIs(t, err, errTest1)
 		assert.Contains(t, err.Error(), "errTest1")
 	})
@@ -55,7 +54,7 @@ func TestContainerBuild_Failure(t *testing.T) {
 		c, err := NewContainer([]any{NewSrv1_OK_With_Need_Srv2_Srv3, NewSrv2_OK_With_Need_Srv4_Srv5,
 			NewSrv5_OK, NewSrv3_OK, NewSrv4_OK_With_Need_Srv1})
 		assert.Nil(t, err)
-		_, err = c.Build(reflect.TypeFor[Service1]())
+		_, err = c.Build(typeFor[Service1]())
 		assert.ErrorIs(t, err, ErrCircularDependency)
 		assert.Contains(t, err.Error(),
 			"ErrCircularDependency: circular dependency detected at type 'autowire.Service1'")
@@ -65,7 +64,7 @@ func TestContainerBuild_Failure(t *testing.T) {
 		// S1 -> S1
 		c, err := NewContainer([]any{NewSrv1_Fail_Need_Srv1})
 		assert.Nil(t, err)
-		_, err = c.Build(reflect.TypeFor[Service1]())
+		_, err = c.Build(typeFor[Service1]())
 		assert.ErrorIs(t, err, ErrCircularDependency)
 		assert.Contains(t, err.Error(),
 			"ErrCircularDependency: circular dependency detected at type 'autowire.Service1'")
@@ -74,7 +73,7 @@ func TestContainerBuild_Failure(t *testing.T) {
 	t.Run("Requires context.Context, but not provide", func(t *testing.T) {
 		c, err := NewContainer([]any{NewSrv1_OK_With_Need_Ctx})
 		assert.Nil(t, err)
-		_, err = c.Build(reflect.TypeFor[Service1]())
+		_, err = c.Build(typeFor[Service1]())
 		assert.ErrorIs(t, err, ErrNotFound)
 		assert.Contains(t, err.Error(),
 			"ErrNotFound: provider not found for type 'context.Context'")
@@ -86,11 +85,11 @@ func TestContainerBuild_Success(t *testing.T) {
 		c, err := NewContainer([]any{NewSrv1_OK_With_Need_Srv2_Srv3_IntSlice, NewSrv2_OK_With_Need_Srv4_Srv5,
 			NewSrv3_OK, NewSrv4_OK, NewSrv5_OK, &struct1_OK, &struct5_OK})
 		assert.Nil(t, err)
-		s1, err := c.Build(reflect.TypeFor[Service1]())
+		s1, err := c.Build(typeFor[Service1]())
 		assert.Nil(t, err)
-		s2, err := c.Get(reflect.TypeFor[Service2]())
+		s2, err := c.Get(typeFor[Service2]())
 		assert.Nil(t, err)
-		s3, err := c.Get(reflect.TypeFor[Service3]())
+		s3, err := c.Get(typeFor[Service3]())
 		assert.Nil(t, err)
 		assert.Equal(t, []any{s2.Interface().(Service2), s3.Interface().(Service3), struct1_OK.Slice},
 			s1.Interface().(Service1).InitArgs())
@@ -100,13 +99,13 @@ func TestContainerBuild_Success(t *testing.T) {
 		ctx := context.Background()
 		c, err := NewContainer([]any{NewSrv1_OK_With_Need_Ctx, NewSrv4_OK, NewSrv5_OK, &struct1_OK})
 		assert.Nil(t, err)
-		s1, err := c.BuildWithCtx(ctx, reflect.TypeFor[Service1]())
+		s1, err := c.BuildWithCtx(ctx, typeFor[Service1]())
 		assert.Nil(t, err)
 		assert.Equal(t, []any{ctx}, s1.Interface().(Service1).InitArgs())
-		s4, err := c.Build(reflect.TypeFor[Service4]())
+		s4, err := c.Build(typeFor[Service4]())
 		assert.Nil(t, err)
 		assert.Equal(t, 0, len(s4.Interface().(Service4).InitArgs()))
-		s5, err := c.Build(reflect.TypeFor[Service5]())
+		s5, err := c.Build(typeFor[Service5]())
 		assert.Nil(t, err)
 		assert.Equal(t, 0, len(s5.Interface().(Service5).InitArgs()))
 	})
@@ -115,12 +114,12 @@ func TestContainerBuild_Success(t *testing.T) {
 		c, err := NewContainer([]any{NewSrv1_OK_With_Need_Srv2_Srv3_IntSlice, NewSrv2_OK_With_Need_Srv4_Srv5,
 			NewSrv3_OK, NewSrv4_OK, NewSrv5_OK, &struct1_OK, &struct5_OK}, SetSharedMode(false))
 		assert.Nil(t, err)
-		s1, err := c.Build(reflect.TypeFor[Service1]())
+		s1, err := c.Build(typeFor[Service1]())
 		assert.Nil(t, err)
 		assert.NotNil(t, s1.Interface().(Service1))
-		_, err = c.Get(reflect.TypeFor[Service2]())
+		_, err = c.Get(typeFor[Service2]())
 		assert.ErrorIs(t, err, ErrNotFound)
-		s2, err := c.Build(reflect.TypeFor[Service2]())
+		s2, err := c.Build(typeFor[Service2]())
 		assert.Nil(t, err)
 		assert.NotNil(t, s2.Interface().(Service2))
 	})
@@ -129,12 +128,12 @@ func TestContainerBuild_Success(t *testing.T) {
 		c, err := NewContainer([]any{NewSrv1_OK_With_Need_Srv2_Srv3_IntSlice, NewSrv2_OK_With_Need_Srv4_Srv5,
 			NewSrv3_OK, NewSrv4_OK, NewSrv5_OK, &struct1_OK, &struct5_OK})
 		assert.Nil(t, err)
-		s1, err := c.Build(reflect.TypeFor[Service1](), NonSharedMode())
+		s1, err := c.Build(typeFor[Service1](), NonSharedMode())
 		assert.Nil(t, err)
 		assert.NotNil(t, s1.Interface().(Service1))
-		_, err = c.Get(reflect.TypeFor[Service2]())
+		_, err = c.Get(typeFor[Service2]())
 		assert.ErrorIs(t, err, ErrNotFound)
-		s2, err := c.Build(reflect.TypeFor[Service2](), NonSharedMode())
+		s2, err := c.Build(typeFor[Service2](), NonSharedMode())
 		assert.Nil(t, err)
 		assert.NotNil(t, s2.Interface().(Service2))
 	})
@@ -142,11 +141,11 @@ func TestContainerBuild_Success(t *testing.T) {
 	t.Run("Success, with overwriting type []int", func(t *testing.T) {
 		c, err := NewContainer([]any{NewSrv1_OK_With_Need_Srv2_Srv3_IntSlice, NewSrv2_OK, NewSrv3_OK, &struct1_OK})
 		assert.Nil(t, err)
-		s1, err := c.Build(reflect.TypeFor[Service1](), ProviderOverwrite([]int{1, 1}))
+		s1, err := c.Build(typeFor[Service1](), ProviderOverwrite([]int{1, 1}))
 		assert.Nil(t, err)
-		s2, err := c.Get(reflect.TypeFor[Service2]())
+		s2, err := c.Get(typeFor[Service2]())
 		assert.Nil(t, err)
-		s3, err := c.Get(reflect.TypeFor[Service3]())
+		s3, err := c.Get(typeFor[Service3]())
 		assert.Nil(t, err)
 		assert.Equal(t, []any{s2.Interface().(Service2), s3.Interface().(Service3), []int{1, 1}},
 			s1.Interface().(Service1).InitArgs())
@@ -160,11 +159,11 @@ func TestContainerBuild_Success(t *testing.T) {
 		// Update struct field value
 		struct1Copy.Slice = []int{100, 200}
 
-		s1, err := c.Build(reflect.TypeFor[Service1]())
+		s1, err := c.Build(typeFor[Service1]())
 		assert.Nil(t, err)
-		s2, err := c.Get(reflect.TypeFor[Service2]())
+		s2, err := c.Get(typeFor[Service2]())
 		assert.Nil(t, err)
-		s3, err := c.Get(reflect.TypeFor[Service3]())
+		s3, err := c.Get(typeFor[Service3]())
 		assert.Nil(t, err)
 		assert.Equal(t, []any{s2.Interface().(Service2), s3.Interface().(Service3), []int{100, 200}},
 			s1.Interface().(Service1).InitArgs())
