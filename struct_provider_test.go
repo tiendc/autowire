@@ -1,7 +1,6 @@
 package autowire
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -58,10 +57,10 @@ func TestStructProvider_Success(t *testing.T) {
 		ps1, err := parseProviders(&struct7_OK_Nested)
 		assert.Nil(t, err)
 		assert.Equal(t, 7, len(ps1.GetAll())) // 5 fields and 2 nested structs themselves
-		prov1, err := ps1.GetFor(reflect.TypeFor[Nested1]())
+		prov1, err := ps1.GetFor(typeFor[Nested1]())
 		assert.Nil(t, err)
 		assert.Equal(t, prov1.Source(), &struct7_OK_Nested)
-		prov2, err := ps1.GetFor(reflect.TypeFor[*Nested2]())
+		prov2, err := ps1.GetFor(typeFor[*Nested2]())
 		assert.Nil(t, err)
 		assert.Equal(t, prov2.Source(), &struct7_OK_Nested)
 	})

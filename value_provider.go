@@ -29,6 +29,6 @@ func (p *valueProvider) Build(ctx *Context, targetType reflect.Type) (reflect.Va
 func newValueProvider[T any](provSrc T, provVal reflect.Value) *valueProvider {
 	return &valueProvider{
 		baseProvider: baseProvider{source: provSrc, sourceVal: provVal},
-		targetType:   reflect.TypeFor[T](),
+		targetType:   typeFor[T](),
 	}
 }

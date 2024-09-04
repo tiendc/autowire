@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	typeError = reflect.TypeFor[error]()
+	typeError = typeFor[error]()
 )
 
 // Provider a provider is an `object creator` and provide the object to a container.
