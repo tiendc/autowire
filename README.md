@@ -97,8 +97,11 @@ go get github.com/tiendc/autowire
 This is convenient in unit testing to overwrite specific types only.
 
 ```go
-    // In unit testing, you may want to overwrite `RepoX` and `RepoY` with fake instances
-    serviceA, err := Build[ServiceA](container, ProviderOverwrite[RepoX](fakeRepoX), ProviderOverwrite[RepoY](fakeRepoY))
+    // In unit testing, you may want to overwrite some `repos` and `clients` with fake instances
+    serviceA, err := Build[ServiceA](container, ProviderOverwrite[RepoX](fakeRepoX),
+            ProviderOverwrite[RepoY](fakeRepoY))
+    serviceA, err := Build[ServiceA](container, ProviderOverwrite[RedisClient](fakeRedisClient),
+            ProviderOverwrite[S3Client](fakeS3Client))
 ```
 
 ## Contributing
