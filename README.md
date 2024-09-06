@@ -5,8 +5,8 @@
 ## Functionalities
 
 - Automatically wiring/injecting objects on creation.
-- Easy to use (see Usages below).
-- `Shared mode` by default that creates only one instance for a type. This option is configurable.
+- Easy to use (see Usage section).
+- `Shared mode` by default that creates only one instance for a type (this option is configurable).
 - Ability to overwrite objects of specific types on building which is convenient for unit testing.
 - No code generation.
 
@@ -42,7 +42,7 @@ go get github.com/tiendc/autowire
     // and RepoY
     type RepoY interface {}
     func NewRepoY(redisClient RedisClient) RepoY {
-        return <RepoY-instance>, nil
+        return <RepoY-instance>
     }
 
     // and a struct provider
@@ -97,11 +97,42 @@ go get github.com/tiendc/autowire
 This is convenient in unit testing to overwrite specific types only.
 
 ```go
-    // In unit testing, you may want to overwrite some `repos` and `clients` with fake instances
-    serviceA, err := Build[ServiceA](container, ProviderOverwrite[RepoX](fakeRepoX),
+    // In unit testing, you may want to overwrite some `repos` and `clients` with fake instances.
+    // NOTE: you may need to use `non-shared mode` to make sure cached objects are not used.
+    serviceA, err := Build[ServiceA](container, NonSharedMode(),
+            ProviderOverwrite[RepoX](fakeRepoX),
             ProviderOverwrite[RepoY](fakeRepoY))
-    serviceA, err := Build[ServiceA](container, ProviderOverwrite[RedisClient](fakeRedisClient),
+    serviceA, err := Build[ServiceA](container, NonSharedMode(),
+            ProviderOverwrite[RedisClient](fakeRedisClient),
             ProviderOverwrite[S3Client](fakeS3Client))
+```
+
+### Reclaim memory after use
+
+Typically, dependency injection is often only used at the initialization phase of a program.
+However, it can take some space in memory which will become wasted after the phase.
+Use the below trick to reclaim the memory taken by the autowire variables.
+
+```go
+    var (
+        // create a global container
+        container = MustNewContainer(...)
+    )
+
+    func autowireCleanUp() {
+        // Assign nil to allow the garbage collector to reclaim the taken memory
+        container = nil
+    }
+
+    func main() {
+        // Initialization phase
+        // Create services and use them
+        serviceA, _ := autowire.Build[ServiceA](container)
+        serviceB, _ := autowire.Build[ServiceB](container)
+
+        // Clean up the usage, make sure you won't use the vars any more
+        autowireCleanUp()
+    }
 ```
 
 ## Contributing
