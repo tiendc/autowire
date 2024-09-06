@@ -9,10 +9,13 @@ import (
 type ProviderSet interface {
 	// GetFor returns a provider for the specified type, or ErrNotFound.
 	GetFor(reflect.Type) (Provider, error)
+
 	// GetAll returns all providers contained within the set
 	GetAll() []Provider
+
 	// Overwrite replaces the existing provider by its target type with the specified one
 	Overwrite(Provider)
+
 	// shallowClone clones the set (shallow clone only)
 	shallowClone() ProviderSet
 }

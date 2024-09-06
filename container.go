@@ -17,19 +17,24 @@ type Container interface {
 	// In this mode, ServiceX will be created only one time, so ServiceA and ServiceB will share the
 	// same ServiceX object.
 	SharedMode() bool
+
 	// setSharedMode sets shared mode
 	setSharedMode(bool)
+
 	// ProviderSet gets provider set within the container
 	ProviderSet() ProviderSet
 
 	// Get gets a value stored in the container for the specified type.
 	// If not found, returns ErrNotFound.
 	Get(targetType reflect.Type) (reflect.Value, error)
+
 	// Build creates a value for the specified type and all other required values.
 	Build(targetType reflect.Type, opts ...ContextOption) (reflect.Value, error)
+
 	// BuildWithCtx creates a value for the specified type with passing a context.Context object.
 	// The context object will be passed to every provider which requires a context.
 	BuildWithCtx(ctx context.Context, targetType reflect.Type, opts ...ContextOption) (reflect.Value, error)
+
 	// Resolve builds dependency graph for the specified type
 	Resolve(targetType reflect.Type) (DependencyGraph, error)
 }
