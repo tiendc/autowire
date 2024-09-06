@@ -109,7 +109,7 @@ This is convenient in unit testing to overwrite specific types only.
 
 ### Reclaim memory after use
 
-Typically, dependency injection is often only used at the initialization phase of a program.
+Typically, dependency injection is only used at the initialization phase of a program.
 However, it can take some space in memory which will become wasted after the phase.
 Use the below trick to reclaim the memory taken by the autowire variables.
 
